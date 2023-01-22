@@ -1,0 +1,24 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Matomo.Maui</id>
+    <version>6.1.0.0</version>
+    <title>This library provides Matomo Tracking for .NET MAUI Apps</title>
+    <authors>bnoffer</authors>
+    <owners>bnotech</owners>
+    <projectUrl>https://github.com/bfn-tech/Matomo.Maui</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This library provides Matomo Tracking for .NET MAUI Apps.</description>
+    <releaseNotes>Updated Nuget package</releaseNotes>
+    <copyright>©Copyright 2023, BNO Technology Solutions e.K.</copyright>
+    <tags>Matomo Piwik MAUI</tags>
+    <dependencies>
+      <group targetFramework="net6.0">
+        <dependency id="Newtonsoft.Json" version="13.0.2" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+		<file src="bin\Release\net6.0\Matomo.Maui.dll" target="lib\net6.0\Matomo.Maui.dll" />
+  </files>
+</package>
