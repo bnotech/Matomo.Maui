@@ -22,7 +22,7 @@ jobs:
       #- name: Setup nuget
       #  uses: nuget/setup-nuget@v1
       - name: Restore packages for solution
-        run: dotnet restore ../Matomo.Maui.sln
+        run: dotnet restore Matomo.Maui.csproj
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.3
