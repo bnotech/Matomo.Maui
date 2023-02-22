@@ -6,7 +6,7 @@ using System.Web;
 
 namespace Matomo.Maui;
 
-public class PiwikAnalytics
+public class MatomoAnalytics
 {
     private string _userAgent;
     public string UserAgent
@@ -32,7 +32,7 @@ public class PiwikAnalytics
 
     System.Timers.Timer timer = new System.Timers.Timer();
 
-    public PiwikAnalytics(string apiUrl, int siteId)
+    public MatomoAnalytics(string apiUrl, int siteId)
     {
         var visitor = GenerateId(16);
         if (storage.HasKey("visitor_id"))
