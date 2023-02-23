@@ -1,4 +1,4 @@
-name: Release Preview Nuget Package
+name: Release Preview (.NET 6.0)
 
 on:
   push:
