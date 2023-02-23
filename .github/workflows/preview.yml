@@ -1,4 +1,4 @@
-name: Release Preview (.NET 6.0)
+name: Release Preview
 
 on:
   push:
