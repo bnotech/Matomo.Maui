@@ -31,8 +31,8 @@ jobs:
           script: |
             return context.payload.ref.replace(/\/refs\/tags\//, '');
 
-      #- name: Setup nuget
-      #  uses: nuget/setup-nuget@v1
+      - name: Setup nuget
+        uses: nuget/setup-nuget@v1
       - name: Restore nuget packages for solution
         run: dotnet restore Matomo.Maui.csproj
 
@@ -45,11 +45,13 @@ jobs:
           $version=${{ steps.tag.outputs.result }}
           $version=$version.replace("refs/tags/v", "")
           dotnet pack Matomo.Maui.csproj -p:NuspecFile=Matomo.Maui.nuspec -c Release -p:PackageVersion=$version
+      - name: Setup Nuget Push
+        run: nuget setApiKey "$env:NUGET_ORG_TOKEN"
+        env:
+          NUGET_ORG_TOKEN: ${{ secrets.NUGET_ORG_TOKEN }}
       - name: Push
         run: |
           $version=${{ steps.tag.outputs.result }}
           $version=$version.replace("refs/tags/v", "")
-          $package="Matomo.Maui." + $version + ".nupkg"
-          dotnet nuget push $package -s https://api.nuget.org/v3/index.json -k "$env:NUGET_ORG_TOKEN"
-        env:
-          NUGET_ORG_TOKEN: ${{ secrets.NUGET_ORG_TOKEN }}
+          $package="package/Matomo.Maui." + $version + ".nupkg"
+          nuget push $package -Source https://api.nuget.org/v3/index.json
