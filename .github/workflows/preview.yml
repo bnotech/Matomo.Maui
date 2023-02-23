@@ -51,6 +51,7 @@ jobs:
           $version=$version.replace("refs/tags/v", "")
           $package="Matomo.Maui." + $version + ".nupkg"
           cd package
+          dir
           dotnet nuget push $package -s https://api.nuget.org/v3/index.json -k "$env:NUGET_ORG_TOKEN"
           cd ..
         env:
