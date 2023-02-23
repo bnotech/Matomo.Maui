@@ -1,0 +1,57 @@
+name: Release Preview (.NET 7.0)
+
+on:
+  push:
+    tags:
+    - "v[0-9]+.[0-9]+.[0-9]+-pre[0-9][0-9][0-9]"
+
+defaults:
+  run:
+    working-directory: ./Matomo.Maui
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      working-directory: ./Matomo.Maui
+    name: Build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Verify commit exists in origin/main
+        run: |
+          git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+          git branch --remote --contains | grep origin/net7.0
+      - name: Extract tag name
+        id: tag
+        uses: actions/github-script@0.2.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            return context.payload.ref.replace(/\/refs\/tags\//, '');
+
+      - name: Setup nuget
+        uses: nuget/setup-nuget@v1
+      - name: Restore nuget packages for solution
+        run: dotnet restore Matomo.Maui.csproj
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.3
+      - name: Build
+        run: msbuild Matomo.Maui.csproj /property:Configuration=Release
+      - name: Pack
+        run: |
+          $version=${{ steps.tag.outputs.result }}
+          $version=$version.replace("refs/tags/v", "")
+          nuget pack Matomo.Maui.nuspec -Prop Configuration=Release -verbosity detailed -basepath ./ -OutputDirectory ./package -Version $version
+      - name: Setup Nuget Push
+        run: nuget setApiKey "$env:NUGET_ORG_TOKEN"
+        env:
+          NUGET_ORG_TOKEN: ${{ secrets.NUGET_ORG_TOKEN }}
+      - name: Push
+        run: |
+          $version=${{ steps.tag.outputs.result }}
+          $version=$version.replace("refs/tags/v", "")
+          $package="package/Matomo.Maui." + $version + ".nupkg"
+          nuget push $package -Source https://api.nuget.org/v3/index.json
