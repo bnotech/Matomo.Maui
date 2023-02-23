@@ -53,5 +53,5 @@ jobs:
         run: |
           $version=${{ steps.tag.outputs.result }}
           $version=$version.replace("refs/tags/v", "")
-          $package="package/Xamarin.Forms.Extensions.Svg." + $version + ".nupkg"
+          $package="package/Matomo.Maui." + $version + ".nupkg"
           nuget push $package -Source https://api.nuget.org/v3/index.json
