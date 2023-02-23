@@ -48,7 +48,7 @@ jobs:
       - name: Test
         run: |
           cd package
-          ls -alh
+          dir
           cd ..
       - name: Push
         run: |
