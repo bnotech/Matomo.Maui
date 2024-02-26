@@ -10,6 +10,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{84FA4430-CA33-4436-98E6-E421058A0973}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matomo.Maui.Sample", "Sample\Matomo.Maui.Sample\Matomo.Maui.Sample.csproj", "{F33C9D2B-FDF0-469A-9704-0154B9B87E3B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +24,10 @@ Global
 		{160D13D6-14DC-4030-9504-4E29EAD09749}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{160D13D6-14DC-4030-9504-4E29EAD09749}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{160D13D6-14DC-4030-9504-4E29EAD09749}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F33C9D2B-FDF0-469A-9704-0154B9B87E3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F33C9D2B-FDF0-469A-9704-0154B9B87E3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F33C9D2B-FDF0-469A-9704-0154B9B87E3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F33C9D2B-FDF0-469A-9704-0154B9B87E3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -31,5 +39,6 @@ Global
 		{F98A6817-2895-47D3-9FC3-E93BB5747555} = {199F81EB-3FE7-451F-BD77-41E680A31F0B}
 		{EBD1EEA9-0CB1-42E1-B01E-17FEB3B1E2C0} = {F98A6817-2895-47D3-9FC3-E93BB5747555}
 		{C7882A5C-EE2F-4B30-AE11-530F33F4CF2A} = {F98A6817-2895-47D3-9FC3-E93BB5747555}
+		{F33C9D2B-FDF0-469A-9704-0154B9B87E3B} = {84FA4430-CA33-4436-98E6-E421058A0973}
 	EndGlobalSection
 EndGlobal
