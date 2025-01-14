@@ -4,7 +4,7 @@ This library provides [Matomo](https://matomo.org) Tracking for .NET MAUI Apps.
 
 ## Status
 
-[![Continuous Integration](https://github.com/bfn-tech/Matomo.Maui/actions/workflows/ci.yml/badge.svg)](https://github.com/bfn-tech/Matomo.Maui/actions/workflows/ci.yml)
+[![Continuous Integration](https://github.com/bnotech/Matomo.Maui/actions/workflows/ci.yml/badge.svg)](https://github.com/bnotech/Matomo.Maui/actions/workflows/ci.yml)
 
 ## Releases
 
@@ -12,7 +12,7 @@ This library is published for .NET 8.0.
 
 ## Documentation
 
-You can find a reference documentation [here](https://bfn-tech.github.io/Matomo.Maui/html/index.html).
+You can find a reference documentation [here](https://bnotech.github.io/Matomo.Maui/html/index.html).
 
 And a sample project in the `Sample/` folder.
 
