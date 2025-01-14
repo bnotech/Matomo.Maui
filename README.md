@@ -4,7 +4,7 @@ This library provides [Matomo](https://matomo.org) Tracking for .NET MAUI Apps.
 
 ## Status
 
-[![Continuous Integration](https://github.com/bnotech/Matomo.Maui/actions/workflows/ci.yml/badge.svg)](https://github.com/bnotech/Matomo.Maui/actions/workflows/ci.yml)
+[![Continuous Integration](https://github.com/bnotech/Matomo.Maui/actions/workflows/ci.yml/badge.svg)](https://github.com/bnotech/Matomo.Maui/actions/workflows/ci.yml) [![NuGet](https://img.shields.io/nuget/v/Matomo.Maui.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Matomo.Maui/)
 
 ## Releases
 
