@@ -45,6 +45,6 @@ jobs:
           $version=${{ steps.tag.outputs.result }}
           $version=$version.replace("refs/tags/v", "")
           $package="package/Matomo.Maui." + $version + ".nupkg"
-          dotnet nuget push $package -k "$env:NUGET_ORG_TOKEN" -Source https://api.nuget.org/v3/index.json
+          dotnet nuget push $package -k "$env:NUGET_ORG_TOKEN" -s https://api.nuget.org/v3/index.json
         env:
           NUGET_ORG_TOKEN: ${{ secrets.NUGET_ORG_TOKEN }}
