@@ -4,72 +4,44 @@ namespace Matomo.Maui.Services.Storage
 {
 	public class SimpleStorage : ISimpleStorage
 	{
-		private string _filename;
-		private Dictionary<string, object> _data;
-
-		public SimpleStorage()
-		{
-			_filename = "matomodata";
-			_data = new Dictionary<string, object>();
-			ReadFromDisk();
-		}
+		private const string GroupName = "matomodata";
 
 		public bool HasKey(string key)
 		{
-			return _data.ContainsKey(key);
+			return Preferences.Default.ContainsKey(GetKey(key));
 		}
 
 		public string Get(string key)
 		{
-			return Get<string>(key);
+			return Preferences.Get(GetKey(key), string.Empty);
 		}
 
 		public T Get<T>(string key)
 		{
-			if (!_data.Any())
-				ReadFromDisk();
-
-			return (T)_data[key];
+			var json = Preferences.Get(GetKey(key), string.Empty);
+			return JsonConvert.DeserializeObject<T>(json);
 		}
 
 		public T Get<T>(string key, T defaultValue)
 		{
-			if (HasKey(key))
-				return Get<T>(key);
+			if (!HasKey(key))
+			{
+				return defaultValue;
+			}
 
-			Put<T>(key, defaultValue);
-			return defaultValue;
+			return Get<T>(key);
 		}
 
 		public void Put<T>(string key, T value)
 		{
-			if (HasKey(key))
-				_data[key] = value;
-			else
-				_data.Add(key, value);
-			WriteToDisk();
+			var json = JsonConvert.SerializeObject(value);
+			Preferences.Default.Set(GetKey(key), json);
 		}
 
-		private void ReadFromDisk()
+		private string GetKey(string nonGroupedKey)
 		{
-			if (File.Exists($"{_filename}.json"))
-			{
-				using (TextReader file = File.OpenText($"{_filename}.json"))
-				{
-					var json = file.ReadToEnd();
-					_data = (Dictionary<string, object>)JsonConvert.DeserializeObject(json);
-				}
-			}
+			return GroupName + nonGroupedKey;
 		}
-
-		private void WriteToDisk()
-		{
-            using (StreamWriter file = File.CreateText($"{_filename}.json"))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(file, _data);
-            }
-        }
 	}
 }
 
