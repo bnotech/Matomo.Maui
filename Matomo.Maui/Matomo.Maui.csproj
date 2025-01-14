@@ -19,7 +19,7 @@
 		<Copyright>©Copyright 2025, BNO Technology Solutions e.K.</Copyright>
 		<Tags>Matomo Piwik MAUI Analytics</Tags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-
+		<PackageLicenseUrl>https://github.com/bnotech/Matomo.Maui/blob/main/LICENSE.md</PackageLicenseUrl>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-ios|AnyCPU'">
@@ -37,6 +37,6 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="..\readme.md" Pack="true" PackagePath="\"/>
+		<None Include="..\README.md" Pack="true" PackagePath="\"/>
 	</ItemGroup>
 </Project>
