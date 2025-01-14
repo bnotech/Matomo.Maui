@@ -1,5 +1,4 @@
-﻿using System;
-namespace Matomo.Maui;
+﻿namespace Matomo.Maui.Models;
 
 public class Dimension
 {

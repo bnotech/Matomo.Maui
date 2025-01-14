@@ -3,11 +3,17 @@ using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Web;
+using Microsoft.Extensions.Configuration;
+using Matomo.Maui.Buffers;
+using Matomo.Maui.Models;
+using Matomo.Maui.Services.Storage;
 
-namespace Matomo.Maui;
+namespace Matomo.Maui.Services.Core;
 
-public class MatomoAnalytics
+public class MatomoAnalytics : IMatomoAnalytics
 {
+    #region Properties
+    
     private string _userAgent;
     public string UserAgent
     {
@@ -21,19 +27,50 @@ public class MatomoAnalytics
         }
     }
 
-    string apiUrl;
-    ActionBuffer actions;
-    NameValueCollection baseParameters;
-    NameValueCollection pageParameters;
+    public bool Verbose { get; set; } = false;
 
-    HttpClient httpClient = new HttpClient();
-    Random random = new Random();
-    SimpleStorage storage = SimpleStorage.Instance;
+    public int UnsentActions { get { lock (_actions) return _actions.Count; } }
 
-    System.Timers.Timer timer = new System.Timers.Timer();
-
-    public MatomoAnalytics(string apiUrl, int siteId)
+    private List<Dimension> _dimensions;
+    public List<Dimension> Dimensions
     {
+        get { return _dimensions ??= []; }
+        set => _dimensions = value;
+    }
+    
+    public bool OptOut
+    {
+        get => _actions is { OptOut: true };
+        set
+        {
+            if (_actions != null)
+                _actions.OptOut = value;
+        }
+    }
+    
+    /// <summary>
+    /// The base url used by the app (piwi's url parameter). Default is https://app
+    /// </summary>
+    public string AppUrl { get; set; } = "https://app";
+    
+    #endregion
+    
+    #region Attributes
+    
+    private readonly string _apiUrl;
+    private readonly ActionBuffer _actions;
+    private readonly NameValueCollection _pageParameters;
+
+    private readonly HttpClient _httpClient = new HttpClient();
+    private readonly Random _random = new Random();
+    
+    private readonly System.Timers.Timer _timer = new System.Timers.Timer();
+
+    #endregion
+    
+    public MatomoAnalytics(IConfiguration configuration, ISimpleStorage storage)
+    {
+        var config = configuration.GetRequiredSection(nameof(MatomoConfig)).Get<MatomoConfig>();
         var visitor = GenerateId(16);
         if (storage.HasKey("visitor_id"))
             visitor = storage.Get("visitor_id");
@@ -41,39 +78,35 @@ public class MatomoAnalytics
         {
             storage.Put("visitor_id", visitor);
         }
-
-        this.apiUrl = $"{apiUrl}/piwik.php";
-        baseParameters = HttpUtility.ParseQueryString(string.Empty);
-        baseParameters["idsite"] = siteId.ToString();
+        
+        _dimensions = [];
+        
+        this._apiUrl = $"{config.ApiUrl}/piwik.php";
+        var baseParameters = HttpUtility.ParseQueryString(string.Empty);
+        baseParameters["idsite"] = config.SiteId.ToString();
         baseParameters["_id"] = visitor;
         baseParameters["cid"] = visitor;
 
-        pageParameters = HttpUtility.ParseQueryString(string.Empty);
+        _pageParameters = HttpUtility.ParseQueryString(string.Empty);
 
-        actions = new ActionBuffer(baseParameters, storage);
+        _actions = new ActionBuffer(baseParameters, storage);
 
-        httpClient.Timeout = TimeSpan.FromSeconds(30);
+        _httpClient.Timeout = TimeSpan.FromSeconds(30);
 
-        timer.Interval = TimeSpan.FromMinutes(2).TotalMilliseconds;
-        timer.Elapsed += async (s, args) => await Dispatch();
-        timer.Start();
+        _timer.Interval = TimeSpan.FromMinutes(2).TotalMilliseconds;
+        _timer.Elapsed += async (s, args) => await Dispatch();
+        _timer.Start();
     }
 
-    public bool Verbose { get; set; } = false;
-
-    public int UnsentActions { get { lock (actions) return actions.Count; } }
-
-    public List<Dimension> Dimensions = new List<Dimension>();
-
+    /// <summary>
+    /// Update a existing Dimension
+    /// </summary>
+    /// <param name="name">Dimension</param>
+    /// <param name="newValue">New value</param>
     public void UpdateDimension(string name, string newValue)
     {
         Dimensions.First(d => d.Name == name).Value = newValue;
     }
-
-    /// <summary>
-    /// The base url used by the app (piwi's url parameter). Default is http://app
-    /// </summary>
-    public string AppUrl { get; set; } = "http://app";
 
     /// <summary>
     /// Tracks a page visit.
@@ -84,16 +117,16 @@ public class MatomoAnalytics
     {
         Log($"[Page] {name}");
 
-        pageParameters["pv_id"] = GenerateId(6);
-        pageParameters["url"] = $"{AppUrl}{path}";
+        _pageParameters["pv_id"] = GenerateId(6);
+        _pageParameters["url"] = $"{AppUrl}{path}";
 
         var parameters = CreateParameters();
         parameters["action_name"] = name;
 
-        parameters.Add(pageParameters);
+        parameters.Add(_pageParameters);
 
-        lock (actions)
-            actions.Add(parameters);
+        lock (_actions)
+            _actions.Add(parameters);
     }
 
     /// <summary>
@@ -106,10 +139,10 @@ public class MatomoAnalytics
     public void TrackPageEvent(string category, string action, string name = null, int? value = null)
     {
         var parameters = CreateEventParemeters(category, action, name, value);
-        parameters.Add(pageParameters);
+        parameters.Add(_pageParameters);
 
-        lock (actions)
-            actions.Add(parameters);
+        lock (_actions)
+            _actions.Add(parameters);
     }
 
     /// <summary>
@@ -145,8 +178,8 @@ public class MatomoAnalytics
         var parameters = CreateEventParemeters(category, action, name, value);
         parameters["url"] = AppUrl; // non-page events must at least have the base url 
 
-        lock (actions)
-            actions.Add(parameters);
+        lock (_actions)
+            _actions.Add(parameters);
     }
 
     private NameValueCollection CreateEventParemeters(string category, string action, string name, int? value)
@@ -177,10 +210,10 @@ public class MatomoAnalytics
         if (category != null)
             parameters["search_cat"] = category;
 
-        parameters.Add(pageParameters);
+        parameters.Add(_pageParameters);
 
-        lock (actions)
-            actions.Add(parameters);
+        lock (_actions)
+            _actions.Add(parameters);
     }
 
     /// <summary>
@@ -194,14 +227,18 @@ public class MatomoAnalytics
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
+    /// <summary>
+    /// Dispatches all tracked actions to the Matomo instance
+    /// </summary>
+    /// <returns>true if successful, else false.</returns>
     public async Task<bool> Dispatch() // TODO run in background: http://arteksoftware.com/backgrounding-with-xamarin-forms/
     {
         var actionsToDispatch = "";
-        lock (actions)
+        lock (_actions)
         {
-            if (actions.Count == 0)
+            if (_actions.Count == 0)
                 return false;
-            actionsToDispatch = actions.CreateOutbox(); // new action buffer to store tracking infos while we dispatch
+            actionsToDispatch = _actions.CreateOutbox(); // new action buffer to store tracking infos while we dispatch
         }
 
         Log($"[Dispatching] {actionsToDispatch}");
@@ -209,11 +246,11 @@ public class MatomoAnalytics
 
         try
         {
-            var response = await httpClient.PostAsync(apiUrl, content);
+            var response = await _httpClient.PostAsync(_apiUrl, content);
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                lock (actions)
-                    actions.ClearOutbox();
+                lock (_actions)
+                    _actions.ClearOutbox();
                 return true;
             }
 
@@ -222,23 +259,20 @@ public class MatomoAnalytics
         catch (Exception e)
         {
             LogError(e);
-            httpClient.CancelPendingRequests();
+            _httpClient.CancelPendingRequests();
         }
         return false;
     }
+    
+    /// <summary>
+    /// Resets the current action queue
+    /// </summary>
+    public void ClearQueue() => _actions?.Clear();
 
-    public bool OptOut
-    {
-        get => actions.OptOut;
-        set => actions.OptOut = value;
-    }
-
-    public void ClearQueue() => actions.Clear();
-
-    NameValueCollection CreateParameters()
+    private NameValueCollection CreateParameters()
     {
         var parameters = HttpUtility.ParseQueryString(string.Empty);
-        parameters["rand"] = random.Next().ToString();
+        parameters["rand"] = _random.Next().ToString();
         parameters["cdt"] = (DateTimeOffset.UtcNow.ToUnixTimeSeconds()).ToString(); // TODO dispatching cdt older thant 24 h needs token_auth in bulk request
         parameters["lang"] = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
         parameters["ua"] = UserAgent;
@@ -249,18 +283,18 @@ public class MatomoAnalytics
         return parameters;
     }
 
-    void Log(object msg)
+    private void Log(object msg)
     {
-        if (Verbose && !actions.OptOut)
+        if (Verbose && !_actions.OptOut)
             Console.WriteLine($"[Analytics] {msg}");
     }
 
-    void LogError(object msg)
+    private void LogError(object msg)
     {
         Console.WriteLine($"[Analytics] [Error] {msg}");
     }
 
-    static string GenerateId(int length)
+    private string GenerateId(int length)
     {
         return Guid.NewGuid().ToString().Replace("-", "").Substring(0, length).ToUpper();
     }
