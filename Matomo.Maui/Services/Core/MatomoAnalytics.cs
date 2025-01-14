@@ -70,7 +70,6 @@ public class MatomoAnalytics : IMatomoAnalytics
     
     public MatomoAnalytics(IConfiguration configuration, ISimpleStorage storage)
     {
-        var config = configuration.GetRequiredSection(nameof(MatomoConfig)).Get<MatomoConfig>();
         var visitor = GenerateId(16);
         if (storage.HasKey("visitor_id"))
             visitor = storage.Get("visitor_id");
@@ -81,12 +80,13 @@ public class MatomoAnalytics : IMatomoAnalytics
         
         _dimensions = [];
         
-        this._apiUrl = $"{config.ApiUrl}/piwik.php";
+        this._apiUrl = $"{configuration["Matomo:ApiUrl"]}/piwik.php";
         var baseParameters = HttpUtility.ParseQueryString(string.Empty);
-        baseParameters["idsite"] = config.SiteId.ToString();
+        baseParameters["idsite"] = configuration["Matomo:SiteId"];
         baseParameters["_id"] = visitor;
         baseParameters["cid"] = visitor;
 
+        AppUrl = configuration["Matomo:SiteUrl"];
         _pageParameters = HttpUtility.ParseQueryString(string.Empty);
 
         _actions = new ActionBuffer(baseParameters, storage);
@@ -219,12 +219,10 @@ public class MatomoAnalytics : IMatomoAnalytics
     /// <summary>
     /// Track an App exit. Needed to acuratly time the visibility of last page and triggers an Dispatch().
     /// </summary>
-    public void LeavingTheApp()
+    public async Task LeavingTheApp()
     {
         TrackPage("Close");
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        Dispatch();
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        await Dispatch();
     }
 
     /// <summary>

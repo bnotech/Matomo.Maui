@@ -87,7 +87,7 @@ public interface IMatomoAnalytics
     /// <summary>
     /// Track an App exit. Needed to accurately time the visibility of last page and triggers an Dispatch().
     /// </summary>
-    void LeavingTheApp();
+    Task LeavingTheApp();
     
     /// <summary>
     /// Dispatches all tracked actions to the Matomo instance
