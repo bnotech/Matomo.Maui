@@ -1,25 +1,10 @@
-﻿using System;
-namespace Matomo.Maui
+﻿namespace Matomo.Maui.Services.Shell
 {
     /// <summary>
     /// Utility class for use with Shell Navigation
     /// </summary>
-	public class ShellHelper
+	public class ShellHelper : IShellHelper
 	{
-        private static object _syncRoot = new object();
-        private static ShellHelper _instance;
-
-        public static ShellHelper Instance
-        {
-            get
-            {
-                lock (_syncRoot)
-                    if (_instance == null)
-                        _instance = new ShellHelper();
-                return _instance;
-            }
-        }
-
         /// <summary>
         /// Get the current Shell Navigation Path
         /// </summary>
@@ -28,13 +13,13 @@ namespace Matomo.Maui
             get
             {
                 var path = "";
-
-                foreach (var page in Shell.Current.Navigation.NavigationStack)
+                
+                foreach (var page in Microsoft.Maui.Controls.Shell.Current.Navigation.NavigationStack)
                 {
                     path += GetPageName($"{page}") + "/";
                 }
                 if (path.Equals("/"))
-                    path = GetPageName($"{Shell.Current.CurrentPage}") + "/";
+                    path = GetPageName($"{Microsoft.Maui.Controls.Shell.Current.CurrentPage}") + "/";
                 return path;
             }
         }

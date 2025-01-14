@@ -1,31 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
-namespace Matomo.Maui
+namespace Matomo.Maui.Services.Storage
 {
-	public class SimpleStorage
+	public class SimpleStorage : ISimpleStorage
 	{
-		private static object _syncRoot = new object();
-		private static SimpleStorage _instance;
-
-		public static SimpleStorage Instance
-		{
-			get
-			{
-				lock (_syncRoot)
-					if (_instance == null)
-						_instance = new SimpleStorage();
-				return _instance;
-			}
-		}
-
 		private string _filename;
 		private Dictionary<string, object> _data;
 
-		private SimpleStorage()
+		public SimpleStorage()
 		{
 			_filename = "matomodata";
 			_data = new Dictionary<string, object>();

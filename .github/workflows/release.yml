@@ -30,28 +30,21 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             return context.payload.ref.replace(/\/refs\/tags\//, '');
-
-      - name: Setup nuget
-        uses: nuget/setup-nuget@v1
+      
       - name: Restore nuget packages for solution
-        run: nuget restore Matomo.Maui.csproj
-
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.3
-      - name: Build
-        run: msbuild Matomo.Maui.csproj /property:Configuration=Release
+        run: nuget restore
+        
       - name: Pack
         run: |
           $version=${{ steps.tag.outputs.result }}
           $version=$version.replace("refs/tags/v", "")
-          nuget pack Matomo.Maui.nuspec -Prop Configuration=Release -verbosity detailed -basepath ./ -OutputDirectory ./package -Version $version
-      - name: Setup Nuget Push
-        run: nuget setApiKey "$env:NUGET_ORG_TOKEN"
-        env:
-          NUGET_ORG_TOKEN: ${{ secrets.NUGET_ORG_TOKEN }}
+          dotnet pack --configuration Release --verbosity detailed --output ../package -p:PackageVersion=$version
+        
       - name: Push
         run: |
           $version=${{ steps.tag.outputs.result }}
           $version=$version.replace("refs/tags/v", "")
           $package="package/Matomo.Maui." + $version + ".nupkg"
-          nuget push $package -Source https://api.nuget.org/v3/index.json
+          dotnet nuget push $package -k "$env:NUGET_ORG_TOKEN" -Source https://api.nuget.org/v3/index.json
+        env:
+          NUGET_ORG_TOKEN: ${{ secrets.NUGET_ORG_TOKEN }}
