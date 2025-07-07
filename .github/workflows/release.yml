@@ -30,16 +30,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             return context.payload.ref.replace(/\/refs\/tags\//, '');
-      
+
       - name: Restore nuget packages for solution
-        run: nuget restore
-        
+        run: dotnet restore
+
       - name: Pack
         run: |
           $version=${{ steps.tag.outputs.result }}
           $version=$version.replace("refs/tags/v", "")
-          dotnet pack --configuration Release --verbosity detailed --output ../package -p:PackageVersion=$version
-        
+          dotnet pack --configuration Release --verbosity detailed --output ../package -p:PackageVersion=$version        
       - name: Push
         run: |
           $version=${{ steps.tag.outputs.result }}
