@@ -86,6 +86,18 @@ public class MatomoAnalytics : IMatomoAnalytics
         baseParameters["_id"] = visitor;
         baseParameters["cid"] = visitor;
 
+        try
+        {
+            if (configuration["Matomo:AuthToken"] != null)
+            {
+                baseParameters["token_auth"] = configuration["Matomo:AuthToken"];
+            }
+        }
+        catch (Exception ex)
+        {
+            
+        }
+        
         AppUrl = configuration["Matomo:SiteUrl"];
         _pageParameters = HttpUtility.ParseQueryString(string.Empty);
 
