@@ -18,7 +18,7 @@ And a sample project in the `Sample/` folder.
 
 ### Getting started
 
-First add the following section to your appsettings.json:
+First add the following section to your `appsettings.json`:
 
 ```
 {
@@ -44,7 +44,7 @@ Now add the Matomo.Maui Nuget Package to your project:
 dotnet add package Matomo.Maui
 ```
 
-Or use your IDE for the job. Next we need to setup Matomo in the ***MauiProgram.cs***:
+Or use your IDE for the job. Next we need to setup Matomo in the `MauiProgram.cs`:
 
 ```
 // ...
@@ -65,7 +65,7 @@ builder
 return builder.Build();
 ```
 
-Last but not least setup your app for dispatiching the events to your Matomo Instance in ***App.xaml.cs***:
+Last but not least setup your app for dispatiching the events to your Matomo Instance in `App.xaml.cs`:
 
 ```
 using Matomo.Maui.Models;
@@ -104,9 +104,30 @@ public partial class App : Application
 }
 ```
 
-You now have access to Matomo via dependency injection, just reference ***IMatomoAnalytics*** in order to have the service injected.
+You now have access to Matomo via dependency injection, just reference `IMatomoAnalytics` in order to have the service injected.
 
-There is also ***IShellHelper*** that helps you to get the current path of the current page. However this is optional.
+There is also `IShellHelper` that helps you to get the current path of the current page. However this is optional.
+
+### Token Authentication
+
+Depending on your setup and the information you want to track, Matomo might require Token based authentication. Learn more about tokens and where to set them up [here](https://matomo.org/faq/general/faq_114/).
+
+Once you have your token you have to add it to your `appsettings.json`:
+
+```
+{
+  // ...
+  "Matomo": {
+    "ApiUrl": "https://matomo.org",
+    "SiteId": 1,
+    "SiteUrl": "https://app",
+    "AuthToken": "YOUR-AUTH-TOKEN" // <- 
+  }
+  // ...
+}
+```
+
+This will add the `token_auth` parameter to your requests sent to Matomo.
 
 ## Credit
 
